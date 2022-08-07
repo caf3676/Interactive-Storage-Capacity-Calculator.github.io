@@ -1,0 +1,7 @@
+name: suri-env
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - ipywidgets
