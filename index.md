@@ -1,5 +1,3 @@
-![surilogo.PNG](attachment:surilogo.PNG)
-
 # Interactive Predictive Storage Capacity Calculator
 
 ### Carlos Figueroa-Diaz, SURI Researcher, University of Texas at Austin
@@ -240,8 +238,3 @@ Thermophysical properties of CO<sub>2 </sub>: https://webbook.nist.gov/cgi/fluid
 Equations for formation volume factor, bubble point pressure, and oil specific gravity: https://www-sciencedirect-com.ezproxy.lib.utexas.edu/science/article/pii/B9780128002193000048
 
 Oil Compressibility Equation: http://dx.doi.org/10.2118/92-03-02
-
-
-```python
-
-```
