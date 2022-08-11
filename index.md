@@ -2,7 +2,7 @@
 
 # Interactive Predictive Storage Capacity Calculator
 
-##To those viewing this webpage, this is a preview of what my jupyter notebook looks like. The interactive part of the calculator is unavaliable in this format as it requires python functionality. Thank you!
+## To those viewing this webpage, this is a preview of what my jupyter notebook looks like. The interactive part of the calculator is unavaliable in this format as it requires python functionality. Thank you!
 
 ### Carlos Figueroa-Diaz, SURI Researcher, University of Texas at Austin
 
