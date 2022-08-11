@@ -1,4 +1,4 @@
-![surilogo.PNG](attachment:surilogo.PNG)
+![SURI_H_Black.jpg](attachment:SURI_H_Black.jpg)
 
 # Interactive Predictive Storage Capacity Calculator
 
@@ -173,7 +173,7 @@ interactive_plot = widgets.interactive_output(carbonCalc, {'P' : P ,'CUMG' : CUM
 
 Run the cell below. Using production data from, change the sliders accordingly. For exact inputs, I recommend double clicking the number slots to type your values instead of using the slider, but it is up to you. As you change inputs, you'll see the predicted storage capacity update in real time.
 
-![surilogo.PNG](attachment:surilogo.PNG)
+![calc.jpg](attachment:calc.jpg)
 
 ### References
 
