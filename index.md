@@ -1,5 +1,3 @@
-![SURI_H_Black.jpg](/Interactive-Storage-Capacity-Calculator.github.io/assets/images/SURI_H_Black.png)
-
 # Interactive Predictive Storage Capacity Calculator
 
 ## To those viewing this webpage, this is a preview of what my jupyter notebook looks like. The interactive part of the calculator is unavaliable in this format as it requires python functionality. Thank you!
@@ -173,7 +171,7 @@ interactive_plot = widgets.interactive_output(carbonCalc, {'P' : P ,'CUMG' : CUM
 
 Run the cell below. Using production data from, change the sliders accordingly. For exact inputs, I recommend double clicking the number slots to type your values instead of using the slider, but it is up to you. As you change inputs, you'll see the predicted storage capacity update in real time.
 
-![calc.jpg](/Interactive-Storage-Capacity-Calculator.github.io/assets/images/calc.png)
+## This is where the user interface would be. Imagine a bunch of sliders that you could adjust to get outputs in real time!
 
 ### References
 
