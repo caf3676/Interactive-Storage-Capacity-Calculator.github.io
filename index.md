@@ -1,3 +1,5 @@
+![surilogo.PNG](attachment:surilogo.PNG)
+
 # Interactive Predictive Storage Capacity Calculator
 
 ### Carlos Figueroa-Diaz, SURI Researcher, University of Texas at Austin
@@ -6,36 +8,47 @@
 
 
 
-The purpose of this notebook is to provide a calculator that inputs various production data and outputs predicted CO<sub>2 </sub>  storage capacity. These inputs are the following:
+The purpose of this notebook is to provide a calculator that inputs various production data and outputs predicted CO<sub>2 </sub>  storage capacity. This calculator takes in the following inputs:
 
 **Pressure** - The reservoir pressure in psia
 
-**CUMO** - Cumulative Oil Production in mmbbl
+**CUMO** - Cumulative Oil Production in mmbbl ($10^6$ barrels)
 
-**CUMG** - Cumulative Gas Production in Bcf
+**CUMG** - Cumulative Gas Production in Bcf (($10^9$ cubic ft)
 
-**Water Volume** - initial water volume in mmbbl
+**Water Volume** - Initial water volume in mmbbl ($10^6$ barrels)
 
-**Injection Volume** - volume of injected water in mmbbl
+**Injection Volume** - Volume of injected water in mmbbl ($10^6$ barrels)
 
-**Depth** - the resevoir depth in ft
+**Depth** - The resevoir depth in ft
 
-**Geothermal Gradient** - the temperature gradient of the reservoir in C/km
+**Geothermal Gradient** - The temperature gradient of the reservoir in °C/km
 
-**Mean Surface Temperature** - the average surface temperature in C
+**Mean Surface Temperature** - The average surface temperature in °C
 
-**API** - the API gravity of the oil
+**API** - The API gravity of the oil
 
-**Efficiency** - the percent storage efficiency 
+**Efficiency** - The percent storage efficiency 
 
-**GOR** - the gas oil ratio
+**GOR** - The gas oil ratio
 
-**Density of CO2** - Density of CO2 in kg/m3
+**Density of CO2** - Density of CO2 in kg/m<sup>3</sup>
 
 ###  Obtaining CO2 Density
 
-The code below approximates the density of CO2 using a given temperature and pressure. Note: This calculator takes in pressures between 0 and 4351 psia and temperatures between 10 and 30 degrees C. 
+The code below approximates the density of CO2 using a given temperature and pressure. This is done by using a multivariable regression model of an equation of state for carbon dioxide. The data for this EOS model is provided by the National Institute of Standards and Technology.
 
+### Key Assumptions
+
+This calculator assumes the following:
+
+1. The gas in the reservoir is pure methane.
+
+2. At discovery, the oil is undersaturated and above the bubble point so there is no gas cap. Therefore the GOR reflects the solution gas ratio.
+
+3. The gas deviation factor is 1.
+
+With these assumptions in mind, note that this calculator is best suited for pure gas or pure oil reservoirs. A calculator suited for mixed reservoirs requires more complicated equations that are better suited for interactions between gas and oil.
 
 ### The Code
 Now that the inputs for this calculator have been defined, let's get into the code. There are sliders for each input. Each slider can be moved to a range of values by the user, to see how changing a certain feature affects predicted storage capacity in real time. These inputs are then used in a function called carbonCalc. 
@@ -51,19 +64,13 @@ The density of CO<sub>2 </sub>, which is approximated using a multivariable regr
 @author: Carlos Figueroa-Diaz @ The University of Texas at Austin
 """
 import numpy as np
-import scipy.linalg
-import matplotlib.pyplot as plt
-from ipywidgets import BoundedFloatText
-from matplotlib.widgets import Slider
-import math
 from IPython.display import display
-from scipy.stats import norm
 from ipywidgets import interactive                      # widgets and interactivity
 from ipywidgets import widgets                            
 from ipywidgets import Layout
 from ipywidgets import Label
 from ipywidgets import VBox, HBox
-from scipy.stats import norm
+from ipywidgets import BoundedFloatText
 
 name = 'Predicted Storage Capacity Calculator, Carlos Figueroa-Diaz,  The University of Texas at Austin'
 
@@ -71,109 +78,62 @@ name = 'Predicted Storage Capacity Calculator, Carlos Figueroa-Diaz,  The Univer
 l = widgets.Text(value=name.center(200),layout=Layout(width='950px', height='30px'))
 
 #Creating sliders for all of the CO2 params
-P = widgets.FloatSlider(min = 1000, max = 4351.13, value = 1000 , step = 1, description = 'Pressure (psia)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-CUMO = ndata = widgets.FloatSlider(min = 0, max = 1e3, value = 1, step = 1, description = 'CUMO ($10^{6}$ bbl)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-CUMG = ndata = widgets.FloatSlider(min = 0, max = 1e3, value = 1, step = 1, description = 'CUMG ($10^{9}$ ft$^3$)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-water = ndata = widgets.FloatSlider(min = 0, max = 1e4, value = 0, step = 1, description = 'Water Volume ($10^{6}$ bbl)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='140px', height='300px'))
-injection = ndata = widgets.FloatSlider(min = 0, max = 1e4, value = 0, step = 1, description = 'Injection Volume ($10^{6}$ bbl)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='160px', height='300px'))
-depth_ft = ndata = widgets.FloatSlider(min = 2000, max = 15000, value = 2000, step = 1, description = 'Depth (ft)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-geoGrad = ndata = widgets.FloatSlider(min = 14, max = 52, value = 25, step = 1, description = 'Geothermal Gradient (C/km)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='180px', height='300px'))
-meanST = ndata = widgets.FloatSlider(min = -20, max = 50, value = 20, step = 1, description = 'Mean Surface Temp (C)',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='140px', height='300px'))
-API = ndata = widgets.FloatSlider(min = 0, max = 80, value = 45, step = 1, description = 'API',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-efficiency = ndata = widgets.FloatSlider(min = 25, max = 100, value = 25, step = 1, description = 'Efficiency',orientation='vertical',continuous_update=True,
-                          layout=Layout(width='120px', height='300px'))
-#GOR = ndata = widgets.FloatSlider(min = 0, max = 1e6, value = 100000, step = 1, description = 'GOR',orientation='vertical',continuous_update=True,
-                          #layout=Layout(width='120px', height='300px'))
+P = widgets.FloatSlider(min = 500, max = 16000, value = 2000 , step = 1, description = 'Pressure (psia)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='120px', height='300px'))
+
+CUMO = ndata = widgets.FloatSlider(min = 0, max = 1e2, value = 1, step = 1, description = 'CUMO ($10^{6}$ bbl)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='120px', height='300px'))
+
+CUMG = ndata = widgets.FloatSlider(min = 0, max = 5e3, value = 1, step = 1, description = 'CUMG ($10^{9}$ ft$^3$)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='120px', height='300px'))
+
+water = ndata = widgets.FloatSlider(min = 0, max = 1e4, value = 0, step = 1, description = 'Water Volume ($10^{6}$ bbl)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='140px', height='300px'))
+
+inject = ndata = widgets.FloatSlider(min = 0, max = 1e4, value = 0, step = 1, description = 'Injection Volume ($10^{6}$ bbl)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='160px', height='300px'))
+
+depth_ft = ndata = widgets.FloatSlider(min = 1500, max = 17000, value = 2000, step = 1, description = 'Depth (ft)',
+                        orientation='vertical', continuous_update=True, layout=Layout(width='120px', height='300px'))
+
+geoGrad = ndata = widgets.FloatSlider(min = 14, max = 52, value = 25, step = 1, description = 'Geothermal Gradient (C/km)',
+                        orientation='vertical',continuous_update=True, layout=Layout(width='180px', height='300px'))
+
+meanST = ndata = widgets.FloatSlider(min = -20, max = 50, value = 20, step = 1, description = 'Mean Surface Temp (C)',
+                        orientation='vertical',continuous_update=True, layout=Layout(width='140px', height='300px'))
+
+API = ndata = widgets.FloatSlider(min = 0, max = 80, value = 45, step = 1, description = 'API', orientation='vertical',
+                        continuous_update=True, layout=Layout(width='120px', height='300px'))
+
+efficiency = ndata = widgets.FloatSlider(min = .01, max = 1, value = .75, step = .01, description = 'Efficiency',
+                        orientation='vertical',continuous_update=True, layout=Layout(width='120px', height='300px'))
+
 #initializes the user interface
-uipars = widgets.HBox([P,CUMO, CUMG, water,injection, depth_ft, geoGrad, meanST, API, efficiency])
+uipars = widgets.HBox([P,CUMO, CUMG, water, inject, depth_ft, geoGrad, meanST, API, efficiency])
 uik = widgets.VBox([l,uipars])
 
-#load first isotherm
-files = np.arange(40, 210, 10)
-data = np.genfromtxt("C:\\Users\\carlo\\OneDrive\\SURI 2022\\ExxonMobil Project\\Sidequests\\NIST\\30 isotherm.txt",
-                     dtype = float, delimiter = '\t', usecols = (0,1,2), skip_header = 1)
-
-#concatenate all isotherm data into T, P, rho array
-for i in files:
-    isotherm = np.genfromtxt("C:\\Users\\carlo\\OneDrive\\SURI 2022\\ExxonMobil Project\\Sidequests\\NIST\\"
-                    + str(i) + " isotherm.txt",  dtype = float, delimiter = '\t', usecols = (0,1,2), skip_header = 1)
-    data = np.concatenate((data, isotherm), axis = 0) 
-
-#Code adapted from GitHub users amroamroamro and MSchmidt99
-#See more at https://gist.github.com/amroamroamro/1db8d69b4b65e8bc66a6
-
-# regular grid covering the domain of the data
-X,Y = np.meshgrid(np.arange(30, 200.5, 0.5), np.arange(10, 30.5, 0.5))
-XX = X.flatten()
-YY = Y.flatten()
-
-# in: [meshgrid], [meshgrid], [np list of coordinate pair np lists. ex: [[x1,y1,z1], [x2,y2,z2], etc.] ], [degree]
-# out: [Z]
-def curve(X, Y, coord, n):
-    XX = X.flatten()
-    YY = Y.flatten()
-
-    # best-fit curve
-    A = XYchooseN(coord[:,0], coord[:,1], n)
-    C,_,_,_ = scipy.linalg.lstsq(A, coord[:,2])
-    # evaluate it on a grid
-    Z = np.dot(XYchooseN(XX, YY, n), C).reshape(X.shape)
-    return Z
-
-# in: [array], [array], [int]
-# out: sum from k=0 to k=n of n choose k for x^n-k * y^k (coefficients ignored)
-def XYchooseN(x,y,n):
-    XYchooseN = []
-    n = n+1
-    for j in range(len(x)):
-        I = x[j]
-        J = y[j]
-        matrix = []
-        Is = []
-        Js = []
-        for i in range(0,n):
-            Is.append(I**i)
-            Js.append(J**i)
-            matrix.append(np.concatenate((np.ones(n-i),np.zeros(i))))
-        Is = np.array(Is)
-        Js = np.array(Js)[np.newaxis]
-        IsJs0s = matrix * Is * Js.T
-        IsJs = []
-        for i in range(0,n):
-            IsJs = np.concatenate((IsJs,IsJs0s[i,:n-i]))
-        XYchooseN.append(IsJs)
-    return np.array(XYchooseN)
-
-Z = curve(X,Y, data, 5)
-
-def findZ(T, P):
-    #converting from psia to mPa
-    P *= 0.00689476
-    pRound = round(P * 2) / 2
-    tRound = round(T * 2) / 2
-    pIndex = int(2 * pRound - 20)
-    tIndex = int(2 * tRound - 60)
-    return Z[pIndex][tIndex]
+#A quintic multivariable regression model for an EOS of CO2 density with respect to temperature and pressure
+def EOS_quintic(X,Y):
+    #convert pressure to MPa
+    Y /= 145.038
+    var = np.array([1, X, Y, X**2, X*Y, Y**2, X**3, X**2 * Y, X * Y**2, Y**3, X**4, X**3 * Y, X**2 * Y**2, X * Y**3,
+                    Y**4, X**5, X**4 * Y, X**3 * Y**2, X**2 * Y**3, X * Y**4, Y**5])
+    coeff = np.array([8.88392845e+02, -1.95891892e+01,  3.32715613e+01,  4.72967153e-02, 7.35818191e-01, -1.43785734e+00,
+                      5.33269784e-04, -5.13514242e-03, -5.55746959e-03,  2.32765649e-02, -2.69521096e-06,  4.36857231e-06,
+                      6.47348502e-05, -3.18001817e-05, -1.51807659e-04,  3.46984410e-09, 8.51630513e-09, -6.49695396e-08,
+                      -1.98531352e-07,  3.12705430e-07, 3.26340650e-07])
+    return np.dot(var, coeff)
 
 #prints the storage capacity of CO2 based on field data
-def carbonCalc(P, CUMG, CUMO, water, injection, depth_ft, geoGrad, meanST, API, efficiency):
+def carbonCalc(P, CUMG, CUMO, water, inject, depth_ft, geoGrad, meanST, API, efficiency):
     #converts production volumes to m3
     oProd = CUMO * 0.16
     gProd = CUMG *0.0283*1000
     wProd = water * 0.16
-    iProd = injection * 0.16
+    iProd = inject * 0.16
     #preliminary unit conversions and calculations 
-    if CUMG > 0:
-        GOR = CUMO / CUMG * 1000
+    if CUMO > 0:
+        GOR = CUMG / CUMO * 1000
     else:
         GOR = 0
     gasSC = 0.0991
@@ -181,6 +141,7 @@ def carbonCalc(P, CUMG, CUMO, water, injection, depth_ft, geoGrad, meanST, API, 
     depth_m = depth_ft * 0.3048
     resT = meanST +  geoGrad * depth_m / 1000.0
     resTR = resT * 9.0/5.0 + 492
+    #hydrostatic pressure has yet to be implemented in this code
     hydroP = depth_m * 10.52 / 1000.0
     oSG = 141.5/ (API + 131)  
     cO = (55.233 * 1e-6) - ((60.588 * 1e-6) * oSG)
@@ -194,20 +155,15 @@ def carbonCalc(P, CUMG, CUMO, water, injection, depth_ft, geoGrad, meanST, API, 
     #calculates total volume of production
     resVol = oProd *volFac + gProd * gasExpFac + wProd - iProd
     #converts this to megatons of CO2
-    try:
-        rhoCO2 = findZ(resT, P)
-        capacity = resVol * (efficiency / 100.0) * rhoCO2 / 1000
-        print("Density of CO2 = " + str(round(rhoCO2, 3)) + " kg/m3")
-        print("Voided Reservoir Volume = " + str(round(resVol, 3)) +  " million m3")
-        print("Storage Capacity = " + str(round(capacity, 3)) + " Megatons of CO2")
-    except IndexError:
-        print("Reservoir Temperature is too high. Lower the depth or the temperature settings.")
+    rhoCO2 = EOS_quintic(resT, P)
+    capacity = resVol * efficiency * rhoCO2 / 1000
+    print("Density of CO2 = " + str(round(rhoCO2, 3)) + " kg/m3")
+    print("Voided Reservoir Volume = " + str(round(resVol, 3)) +  " million m3")
+    print("Storage Capacity = " + str(round(capacity, 3)) + " Megatons of CO2")
     
-    
-    
-    
+       
 #Plots all of the sliders for the parameters, allowing a user to change parameters in real time
-interactive_plot = widgets.interactive_output(carbonCalc, {'P' : P ,'CUMG' : CUMG , 'CUMO' : CUMO, 'water' : water, 'injection' : injection,'depth_ft' : depth_ft
+interactive_plot = widgets.interactive_output(carbonCalc, {'P' : P ,'CUMG' : CUMG , 'CUMO' : CUMO, 'water' : water, 'inject' : inject,'depth_ft' : depth_ft
                                                            , 'geoGrad' : geoGrad , 'meanST' : meanST,'API' : API,'efficiency': efficiency})
 
 
@@ -238,3 +194,8 @@ Thermophysical properties of CO<sub>2 </sub>: https://webbook.nist.gov/cgi/fluid
 Equations for formation volume factor, bubble point pressure, and oil specific gravity: https://www-sciencedirect-com.ezproxy.lib.utexas.edu/science/article/pii/B9780128002193000048
 
 Oil Compressibility Equation: http://dx.doi.org/10.2118/92-03-02
+
+
+```python
+
+```
