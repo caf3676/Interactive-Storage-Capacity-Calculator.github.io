@@ -2,11 +2,11 @@
 
 # Interactive Predictive Storage Capacity Calculator
 
+##To those viewing this webpage, this is a preview of what my jupyter notebook looks like. The interactive part of the calculator is unavaliable in this format as it requires python functionality. Thank you!
+
 ### Carlos Figueroa-Diaz, SURI Researcher, University of Texas at Austin
 
 ### The Objective
-
-
 
 The purpose of this notebook is to provide a calculator that inputs various production data and outputs predicted CO<sub>2 </sub>  storage capacity. This calculator takes in the following inputs:
 
@@ -173,19 +173,7 @@ interactive_plot = widgets.interactive_output(carbonCalc, {'P' : P ,'CUMG' : CUM
 
 Run the cell below. Using production data from, change the sliders accordingly. For exact inputs, I recommend double clicking the number slots to type your values instead of using the slider, but it is up to you. As you change inputs, you'll see the predicted storage capacity update in real time.
 
-
-```python
-#displays the plot and user interface
-display(uik, interactive_plot)
-```
-
-
-    VBox(children=(Text(value='                                                    Predicted Storage Capacity Calc…
-
-
-
-    Output()
-
+![surilogo.PNG](attachment:surilogo.PNG)
 
 ### References
 
@@ -196,6 +184,3 @@ Equations for formation volume factor, bubble point pressure, and oil specific g
 Oil Compressibility Equation: http://dx.doi.org/10.2118/92-03-02
 
 
-```python
-
-```
